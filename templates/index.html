@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html id="html" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <title>Face Doctor</title>
+  <style>
+    .img-r{
+   width:70%;
+   border-radius: 100%;
+ }
+   .img-fluid{
+     width: 50%;
+   }
+  </style>
+</head>
+
+
+<body>
+<nav class="container">
+  <ul>
+    <li><a href="#" class="secondary"></a></li>
+  </ul>
+  <ul>
+    <li><strong>Face Doctor</strong></li>
+  </ul>
+  <ul>
+    <li><a onclick="darklight()" href="#" class="secondary"><i class="fa-solid fa-moon"></i></a></li>
+  </ul>
+</nav>
+
+<main class="container">
+  <article>
+    <form onchange="get_image()">
+    <label for="file">
+      <div class="imageContainer" id="imageContainer">
+        
+      </div>
+      <input class="icn" type="file" id="icn" name="file">
+    </label>
+    <input class="secondary" type="submit" id="subfrm" value="Detect">
+    </form>
+  </article>
+  
+  <div id="result">
+    
+  </div>
+  
+</main>
+</body>
+
+<script>
+  function darklight() {
+    var html = document.getElementById('html');
+    var currentTheme = html.getAttribute('data-theme');
+    if (currentTheme === 'light') {
+      html.setAttribute('data-theme', 'dark');
+    } else {
+      html.setAttribute('data-theme', 'light');
+    }
+  }
+  
+  function get_image() {
+    var input = document.getElementById('icn');
+    var imageContainer = document.getElementById('imageContainer');
+  
+    if (input.files && input.files[0]) {
+      var reader = new FileReader();
+  
+      reader.onload = function(e) {
+        imageContainer.innerHTML = '<img class="img-fluid" src="' + e.target.result + '" />';
+      }
+  
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+  
+  
+
+
+
+
+  document.getElementById('subfrm').addEventListener('click', function(event) {
+    event.preventDefault(); // Prevent the default form submission
+    sendPostRequest();
+  });
+
+  function sendPostRequest() {
+    var input = document.getElementById('icn');
+    
+    if (input.files && input.files[0]) {
+  
+   const selectedFile = input.files[0];
+   const newName = [...Array(7)].map(() => String.fromCharCode(Math.floor(Math.random() * 26) + 97)).join('');
+
+const formData = new FormData();
+formData.append('selfie', new File([selectedFile], newName, { type: selectedFile.type }));
+    
+
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', 'get-face', true);
+
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+
+var data = JSON.parse(xhr.responseText);
+     ;
+                var res = document.getElementById('result');
+                res.classList.toggle('d-none');
+
+var offset = 150; // Adjust this value as needed
+    var rect = res.getBoundingClientRect();
+    window.scrollTo({
+        top: rect.top + window.scrollY - offset,
+        behavior: 'smooth'
+    });
+
+                res.innerHTML = `<article> <center> <img class="img-r" src="${data.result}"></center> <br> 
+                                 <h5>You Have ${data.shape}</h5>
+                                 <br> <small class="text-muted"></small></article>`
+
+
+
+
+        } else {
+          // Handle errors
+          console.error('Error:', xhr.statusText);
+        }
+      };
+
+      xhr.onerror = function() {
+        // Handle network errors
+        console.error('Network error');
+      };
+
+      xhr.send(formData);
+    } else {
+      console.error('No image selected.');
+    }
+  }
+
+
+
+
+
+  
+ /*
+  function sendPostRequest() {
+    var input = document.getElementById('icn');
+    if (input.files && input.files[0]) {
+      var formData = new FormData();
+      formData.append('selfie', input.files[0]);
+
+      fetch('get-shape', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Handle the response data here
+        console.log(data);
+      })
+      .catch(error => {
+        // Handle any errors here
+        console.error('Error:', error);
+      });
+    } else {
+      console.error('No image selected.');
+    }
+  } */
+</script>
+
+ 
+ 
+
+</html>
